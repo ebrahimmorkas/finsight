@@ -126,11 +126,19 @@ class CategoryClassifier:
 
 
 def cross_validated_accuracy(examples: list[Example], labels: list[str]) -> float | None:
-    """Mean accuracy over stratified folds, or ``None`` if there is too little data."""
+    """Mean accuracy over stratified folds, or ``None`` if there is too little data.
+
+    Categories with a single example can't be split across folds, so they are
+    left out of the evaluation (they are still used for training).
+    """
     counts = {label: labels.count(label) for label in set(labels)}
-    folds = min(5, min(counts.values()))
-    if folds < 2 or len(counts) < 2:
+    keep = [i for i, label in enumerate(labels) if counts[label] >= 2]
+    kept_counts = [count for count in counts.values() if count >= 2]
+    if len(kept_counts) < 2:
         return None
+    folds = min(5, min(kept_counts))
     splitter = StratifiedKFold(n_splits=folds, shuffle=True, random_state=0)
-    scores = cross_val_score(build_pipeline(), examples, labels, cv=splitter)
+    scores = cross_val_score(
+        build_pipeline(), [examples[i] for i in keep], [labels[i] for i in keep], cv=splitter
+    )
     return float(scores.mean())
