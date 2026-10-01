@@ -1,5 +1,6 @@
 {% if user.is_authenticated %}
   <a href="{% url 'ledger:transactions' %}">Transactions</a>
+  <a href="{% url 'budgets:overview' %}">Budgets</a>
   <a href="{% url 'ledger:accounts' %}">Accounts</a>
   <a href="{% url 'ledger:categories' %}">Categories</a>
   <a href="{% url 'categorization:overview' %}">Smart rules</a>
