@@ -1,0 +1,5 @@
+Hi {{ user.get_short_name }},
+
+{% if status.state == "exceeded" %}You've spent {{ status.spent }} on {{ status.budget.category.name }} this month, which is over your budget of {{ status.budget.amount }}.{% else %}You've used {{ status.percent }}% of your {{ status.budget.category.name }} budget this month ({{ status.spent }} of {{ status.budget.amount }}). {{ status.remaining }} left.{% endif %}
+
+FinSight
