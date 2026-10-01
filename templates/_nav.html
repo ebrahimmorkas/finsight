@@ -1,4 +1,7 @@
 {% if user.is_authenticated %}
+  <a href="{% url 'ledger:transactions' %}">Transactions</a>
+  <a href="{% url 'ledger:accounts' %}">Accounts</a>
+  <a href="{% url 'ledger:categories' %}">Categories</a>
   <span class="muted">{{ user.get_short_name }}</span>
   <form method="post" action="{% url 'logout' %}" class="inline">
     {% csrf_token %}<button class="link" type="submit">Log out</button>

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Categories{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Categories</h1>
+  <a class="btn" href="{% url 'ledger:category-create' %}">Add category</a>
+</div>
+<div class="card">
+  <table class="table">
+    <thead><tr><th>Category</th><th>Type</th></tr></thead>
+    <tbody>
+      {% for category in categories %}
+        <tr>
+          <td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:{{ category.color }}"></span> {{ category.name }}</td>
+          <td>{{ category.get_kind_display }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

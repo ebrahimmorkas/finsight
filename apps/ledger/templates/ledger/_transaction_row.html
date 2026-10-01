@@ -1,0 +1,18 @@
+{% load humanize %}
+<tr id="txn-{{ t.pk }}">
+  <td>{{ t.date|date:"M j, Y" }}</td>
+  <td>
+    <a href="{% url 'ledger:transaction-edit' t.pk %}">{{ t.description|truncatechars:48 }}</a>
+    <div class="muted" style="font-size:.8rem">{{ t.account.name }}{% if t.merchant %} · {{ t.merchant }}{% endif %}</div>
+  </td>
+  <td>
+    <select class="inline-select" name="category" aria-label="Category"
+            hx-post="{% url 'ledger:set-category' t.pk %}" hx-target="#txn-{{ t.pk }}" hx-swap="outerHTML">
+      <option value="">Uncategorized</option>
+      {% for c in categories %}<option value="{{ c.pk }}"{% if c.pk == t.category_id %} selected{% endif %}>{{ c.name }}</option>{% endfor %}
+    </select>
+    {% if t.categorized_by == "ml" %}<span class="pill pill--ml" title="Confidence {{ t.confidence|floatformat:2 }}">auto</span>
+    {% elif t.categorized_by == "rule" %}<span class="pill pill--rule">rule</span>{% endif %}
+  </td>
+  <td class="amount {% if t.amount > 0 %}amount--in{% else %}amount--out{% endif %}">{{ t.amount|floatformat:2|intcomma }}</td>
+</tr>
