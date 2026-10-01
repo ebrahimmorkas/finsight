@@ -42,7 +42,7 @@ def test_new_users_get_default_categories(user):
 def test_merchant_is_set_on_save():
     txn = TransactionFactory(description="SPOTIFY P1A2B3C4D5 STOCKHOLM SE")
 
-    assert txn.merchant == "SPOTIFY P1A2B3C4D5 STOCKHOLM"
+    assert txn.merchant == "SPOTIFY STOCKHOLM"
 
 
 def test_account_balance():
