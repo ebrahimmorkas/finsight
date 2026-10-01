@@ -155,3 +155,12 @@ def test_duplicate_account_name_rejected(auth_client, user):
     )
 
     assert "name" in response.context["form"].errors
+
+
+def test_unticked_uncategorized_filter_keeps_uncategorized_rows(auth_client, user):
+    account = AccountFactory(user=user)
+    TransactionFactory(account=account, description="NO CATEGORY", amount=Decimal("-5"))
+
+    response = auth_client.get(reverse("ledger:transactions"), {"direction": "out"})
+
+    assert [t.description for t in response.context["transactions"]] == ["NO CATEGORY"]

@@ -9,11 +9,10 @@ class TransactionFilter(django_filters.FilterSet):
     q = django_filters.CharFilter(method="search", label="Search")
     account = django_filters.ModelChoiceFilter(queryset=Account.objects.none())
     category = django_filters.ModelChoiceFilter(queryset=Category.objects.none())
+    # An unticked checkbox submits nothing, which CheckboxInput reads as False;
+    # only filter when it is ticked, otherwise uncategorized rows would be hidden.
     uncategorized = django_filters.BooleanFilter(
-        field_name="category",
-        lookup_expr="isnull",
-        label="Only uncategorized",
-        widget=forms.CheckboxInput,
+        method="filter_uncategorized", label="Only uncategorized", widget=forms.CheckboxInput
     )
     start = django_filters.DateFilter(
         field_name="date", lookup_expr="gte", widget=forms.DateInput(attrs={"type": "date"})
@@ -40,6 +39,9 @@ class TransactionFilter(django_filters.FilterSet):
             | Q(merchant__icontains=value)
             | Q(notes__icontains=value)
         )
+
+    def filter_uncategorized(self, queryset, name, value):
+        return queryset.filter(category__isnull=True) if value else queryset
 
     def filter_direction(self, queryset, name, value):
         return queryset.filter(amount__lt=0) if value == "out" else queryset.filter(amount__gt=0)
