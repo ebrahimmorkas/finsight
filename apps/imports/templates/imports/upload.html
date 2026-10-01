@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Import transactions{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Import a bank statement</h1>
+  <a href="{% url 'imports:history' %}">Import history</a>
+</div>
+<div class="layout" style="grid-template-columns:1fr 320px">
+  <div class="card">
+    <form method="post" enctype="multipart/form-data" class="form" novalidate>
+      {% csrf_token %}
+      {{ form.as_div }}
+      <div><button class="btn" type="submit">Import</button></div>
+    </form>
+  </div>
+  <aside class="card">
+    <h3>Supported formats</h3>
+    <p class="muted">Most bank CSV exports work. FinSight looks for columns named like
+      <em>Date</em>, <em>Description</em> / <em>Payee</em> / <em>Memo</em>, and either
+      <em>Amount</em> or <em>Debit</em> + <em>Credit</em>.</p>
+    <p class="muted">Re-importing an overlapping statement is safe: transactions already imported are skipped.</p>
+  </aside>
+</div>
+{% endblock %}

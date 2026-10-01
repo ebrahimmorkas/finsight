@@ -8,6 +8,7 @@ urlpatterns = [
     path("", include("apps.core.urls")),
     path("accounts/", include("apps.accounts.urls")),
     path("", include("apps.ledger.urls")),
+    path("imports/", include("apps.imports.urls")),
 ]
 
 if settings.DEBUG:
