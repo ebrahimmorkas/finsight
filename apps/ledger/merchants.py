@@ -12,6 +12,7 @@ _NOISE = [
     re.compile(r"\bHELP\.\S+"),  # support links: HELP.UBER.COM
     re.compile(r"\.(?:COM|NET|ORG|IO|CO)\b"),  # domain suffixes: NETFLIX.COM
     re.compile(r"\*[A-Z0-9]+"),  # reference after an asterisk: AMZN*2K4L19
+    re.compile(r"\b(?=[A-Z]*\d)(?=\d*[A-Z])[A-Z0-9]{6,}\b"),  # mixed reference codes: P2C8F0A1
     re.compile(r"#\s*\d+"),  # store numbers: #1234
     re.compile(r"\b\d{4,}\b"),  # long numbers: card / reference / dates
     re.compile(r"\b(?:POS|DEBIT|CREDIT|CARD|PURCHASE|PAYMENT|ONLINE|VISA|MC)\b"),
