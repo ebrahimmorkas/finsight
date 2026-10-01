@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "apps.imports",
     "apps.categorization",
     "apps.budgets",
+    "apps.insights",
 ]
 
 MIDDLEWARE = [

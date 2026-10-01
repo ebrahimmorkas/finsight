@@ -12,6 +12,7 @@ from collections import Counter
 
 from django.db import transaction
 
+from apps.ledger.events import transactions_changed
 from apps.ledger.merchants import normalize_merchant
 from apps.ledger.models import Transaction
 
@@ -79,6 +80,7 @@ def import_statement(*, user, account, filename: str, parsed: ParseResult) -> Im
             user=user, import_hash__in=[t.import_hash for t in new]
         ).values_list("pk", flat=True)
     )
+    transaction.on_commit(lambda: transactions_changed.send(sender=ImportBatch, user_id=user.pk))
     transaction.on_commit(
         lambda: transactions_imported.send(
             sender=ImportBatch, user=user, transaction_ids=ids, batch=batch

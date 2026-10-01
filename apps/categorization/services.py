@@ -20,6 +20,7 @@ from django.db import transaction as db_transaction
 from django.db.models import F
 from django.utils import timezone
 
+from apps.ledger.events import transactions_changed
 from apps.ledger.models import Category, Transaction
 
 from .classifier import CategoryClassifier, Example, cross_validated_accuracy
@@ -127,6 +128,8 @@ def categorize(user, transactions) -> int:
 
     done = [t for t in pending if t.category_id is not None]
     Transaction.objects.bulk_update(done, ["category", "categorized_by", "confidence"])
+    if done:
+        transactions_changed.send(sender=Transaction, user_id=user.pk)
     return len(done)
 
 
