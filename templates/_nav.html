@@ -1,0 +1,9 @@
+{% if user.is_authenticated %}
+  <span class="muted">{{ user.get_short_name }}</span>
+  <form method="post" action="{% url 'logout' %}" class="inline">
+    {% csrf_token %}<button class="link" type="submit">Log out</button>
+  </form>
+{% else %}
+  <a href="{% url 'login' %}">Log in</a>
+  <a class="btn btn--small" href="{% url 'signup' %}">Get started</a>
+{% endif %}
