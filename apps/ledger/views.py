@@ -7,6 +7,7 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 
+from .events import category_corrected
 from .filters import TransactionFilter
 from .forms import AccountForm, CategoryForm, TransactionForm
 from .models import Account, Category, Transaction
@@ -119,8 +120,13 @@ class TransactionCreateView(OwnedMixin, CreateView):
     extra_context = {"title": "Add transaction"}
 
     def form_valid(self, form):
+        response = super().form_valid(form)
         messages.success(self.request, "Transaction added.")
-        return super().form_valid(form)
+        if self.object.category_id:
+            category_corrected.send(
+                sender=Transaction, user=self.request.user, transaction=self.object
+            )
+        return response
 
 
 class TransactionUpdateView(OwnedMixin, UpdateView):
@@ -152,6 +158,8 @@ class SetCategoryView(LoginRequiredMixin, View):
         )
         transaction.confidence = None
         transaction.save(update_fields=["category", "categorized_by", "confidence", "updated_at"])
+        if category:
+            category_corrected.send(sender=Transaction, user=request.user, transaction=transaction)
         categories = Category.objects.filter(user=request.user)
         return render(
             request,
