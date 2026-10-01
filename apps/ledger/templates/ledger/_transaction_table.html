@@ -1,0 +1,22 @@
+<div id="results">
+  <p class="muted">{{ paginator.count|default:0 }} transaction{{ paginator.count|pluralize }}</p>
+  {% if transactions %}
+  <div class="card">
+    <table class="table">
+      <thead><tr><th>Date</th><th>Description</th><th>Category</th><th class="amount">Amount</th></tr></thead>
+      <tbody>
+        {% for t in transactions %}{% include "ledger/_transaction_row.html" %}{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <p class="empty">No transactions match.</p>
+  {% endif %}
+  {% if is_paginated %}
+    <nav class="pagination">
+      {% if page_obj.has_previous %}<a href="?{{ querystring }}&page={{ page_obj.previous_page_number }}">&larr; Newer</a>{% endif %}
+      <span class="muted">Page {{ page_obj.number }} of {{ paginator.num_pages }}</span>
+      {% if page_obj.has_next %}<a href="?{{ querystring }}&page={{ page_obj.next_page_number }}">Older &rarr;</a>{% endif %}
+    </nav>
+  {% endif %}
+</div>
