@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.ledger",
     "apps.imports",
+    "apps.categorization",
 ]
 
 MIDDLEWARE = [
@@ -88,6 +89,24 @@ if REDIS_URL:
     }
 else:
     CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
+
+# --- Celery ---------------------------------------------------------------------
+# With a broker, categorization and model training run in workers. Without one,
+# tasks run eagerly in-process, so the app works with zero extra services.
+CELERY_BROKER_URL = env("CELERY_BROKER_URL", default=REDIS_URL)
+CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default=REDIS_URL or None)
+CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER", default=not CELERY_BROKER_URL)
+CELERY_TASK_EAGER_PROPAGATES = True
+CELERY_TASK_ACKS_LATE = True
+CELERY_TIMEZONE = "UTC"
+CELERY_BEAT_SCHEDULE: dict = {}
+if not CELERY_BROKER_URL:
+    CELERY_BROKER_URL = "memory://"
+
+# --- Machine learning ----------------------------------------------------------------
+FINSIGHT_ML_CONFIDENCE = env.float("FINSIGHT_ML_CONFIDENCE", default=0.6)
+FINSIGHT_ML_MIN_SAMPLES = env.int("FINSIGHT_ML_MIN_SAMPLES", default=30)
+FINSIGHT_ML_RETRAIN_AFTER = env.int("FINSIGHT_ML_RETRAIN_AFTER", default=5)
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},

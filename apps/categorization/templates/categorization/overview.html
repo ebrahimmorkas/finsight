@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Smart categorization{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Smart categorization</h1>
+    <p class="muted">Rules run first, then a machine-learning model that learns from the categories you choose.</p>
+  </div>
+  <form method="post" action="{% url 'categorization:run' %}" class="inline">
+    {% csrf_token %}<button class="btn" type="submit">Categorize {{ uncategorized }} uncategorized</button>
+  </form>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat__value">{% if model %}Personal{% else %}Starter{% endif %}</div>
+    <div class="stat__label">{% if model %}trained {{ model.trained_at|timesince }} ago on {{ model.samples }} transactions{% else %}built-in model until you have {{ min_samples }} labelled transactions{% endif %}</div>
+  </div>
+  <div class="stat">
+    <div class="stat__value">{% if model.accuracy is not None %}{% widthratio model.accuracy 1 100 %}%{% else %}—{% endif %}</div>
+    <div class="stat__label">cross-validated accuracy</div>
+  </div>
+  <div class="stat"><div class="stat__value">{{ labelled }}</div><div class="stat__label">transactions you've labelled</div></div>
+  <div class="stat"><div class="stat__value">{{ auto }}</div><div class="stat__label">auto-categorized (≥ {% widthratio threshold 1 100 %}% confidence)</div></div>
+</div>
+
+<form method="post" action="{% url 'categorization:retrain' %}" style="margin-bottom:24px">
+  {% csrf_token %}<button class="btn btn--ghost btn--small" type="submit">Retrain my model now</button>
+  <span class="muted">It also retrains automatically after you correct a few categories.</span>
+</form>
+
+<div class="layout" style="grid-template-columns:1fr 1fr">
+  <section class="card">
+    <h2>Rules</h2>
+    {% if rules %}
+      <table class="table">
+        <tbody>
+          {% for rule in rules %}
+            <tr>
+              <td>{{ rule.get_field_display }} contains <strong>{{ rule.pattern }}</strong></td>
+              <td>&rarr; {{ rule.category.name }}</td>
+              <td>
+                <form method="post" action="{% url 'categorization:rule-delete' rule.pk %}" class="inline">
+                  {% csrf_token %}<button class="link" type="submit">Delete</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="muted">No rules yet.</p>
+    {% endif %}
+  </section>
+  <section class="card">
+    <h2>Add a rule</h2>
+    <form method="post" class="form" novalidate>
+      {% csrf_token %}{{ form.as_div }}
+      <div><button class="btn" type="submit">Save rule</button></div>
+    </form>
+  </section>
+</div>
+{% endblock %}
