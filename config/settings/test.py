@@ -1,4 +1,5 @@
 from .base import *  # noqa: F403
+from .base import REST_FRAMEWORK
 
 DEBUG = False
 SECRET_KEY = "test-secret-key-that-is-long-enough-for-hs256"
@@ -11,3 +12,4 @@ STORAGES = {
 CELERY_TASK_ALWAYS_EAGER = True
 CELERY_BROKER_URL = "memory://"
 CELERY_RESULT_BACKEND = None
+REST_FRAMEWORK = {**REST_FRAMEWORK, "DEFAULT_THROTTLE_CLASSES": []}

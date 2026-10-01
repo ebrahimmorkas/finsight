@@ -28,6 +28,9 @@ INSTALLED_APPS = [
     "django.contrib.humanize",
     # third party
     "django_filters",
+    "rest_framework",
+    "rest_framework.authtoken",
+    "drf_spectacular",
     # local
     "apps.core",
     "apps.accounts",
@@ -36,6 +39,7 @@ INSTALLED_APPS = [
     "apps.categorization",
     "apps.budgets",
     "apps.insights",
+    "apps.api",
 ]
 
 MIDDLEWARE = [
@@ -132,6 +136,26 @@ MEDIA_ROOT = BASE_DIR / "media"
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+}
+
+# --- REST API -------------------------------------------------------------------
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 50,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_THROTTLE_CLASSES": ["rest_framework.throttling.UserRateThrottle"],
+    "DEFAULT_THROTTLE_RATES": {"user": env("THROTTLE_USER", default="600/min")},
+}
+SPECTACULAR_SETTINGS = {
+    "TITLE": "FinSight API",
+    "DESCRIPTION": "Accounts, transactions with ML categorization, and spending insights.",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
 }
 
 SITE_URL = env("SITE_URL", default="http://localhost:8000")
