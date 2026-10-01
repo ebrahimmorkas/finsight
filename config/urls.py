@@ -11,6 +11,7 @@ urlpatterns = [
     path("imports/", include("apps.imports.urls")),
     path("smart/", include("apps.categorization.urls")),
     path("budgets/", include("apps.budgets.urls")),
+    path("dashboard/", include("apps.insights.urls")),
 ]
 
 if settings.DEBUG:

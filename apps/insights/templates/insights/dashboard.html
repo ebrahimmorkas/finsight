@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{% now "F Y" %}</h1>
+    {% if data.uncategorized %}
+      <p class="muted"><a href="{% url 'ledger:transactions' %}?uncategorized=true">{{ data.uncategorized }} transaction{{ data.uncategorized|pluralize }} need a category</a></p>
+    {% endif %}
+  </div>
+  <a class="btn" href="{% url 'imports:upload' %}">Import statement</a>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="stat__value amount--in">{{ data.income|floatformat:2|intcomma }}</div><div class="stat__label">Income this month</div></div>
+  <div class="stat"><div class="stat__value">{{ data.expenses|floatformat:2|intcomma }}</div><div class="stat__label">Spending this month</div></div>
+  <div class="stat"><div class="stat__value">{{ data.net|floatformat:2|intcomma }}</div><div class="stat__label">Net</div></div>
+  <div class="stat"><div class="stat__value">{% if data.savings_rate is not None %}{{ data.savings_rate }}%{% else %}—{% endif %}</div><div class="stat__label">Savings rate</div></div>
+</div>
+
+<div class="charts">
+  <section class="card">
+    <h2>Cash flow, last 12 months</h2>
+    <div class="chart-box"><canvas id="cashflow-chart" aria-label="Monthly income and spending"></canvas></div>
+  </section>
+  <section class="card">
+    <h2>Spending by category</h2>
+    {% if data.categories %}
+      <div class="chart-box"><canvas id="category-chart" aria-label="Spending by category this month"></canvas></div>
+    {% else %}
+      <p class="empty">No spending yet this month.</p>
+    {% endif %}
+  </section>
+</div>
+
+<div class="charts" style="margin-top:20px">
+  <section class="card">
+    <h2>Recurring payments</h2>
+    <p class="muted">Detected from your history &middot; about {{ data.recurring_monthly_total|floatformat:2|intcomma }} per month</p>
+    {% if data.recurring %}
+      <table class="table">
+        <thead><tr><th>Merchant</th><th>Every</th><th class="amount">Amount</th><th>Next</th></tr></thead>
+        <tbody>
+          {% for r in data.recurring %}
+            <tr>
+              <td>{{ r.merchant }}</td>
+              <td>{{ r.interval_label }}</td>
+              <td class="amount">{{ r.average_amount|floatformat:2|intcomma }}</td>
+              <td>{{ r.next_date|date:"M j" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="muted">Nothing detected yet. Import a few months of history.</p>
+    {% endif %}
+  </section>
+  <section class="card">
+    <h2>Top merchants (90 days)</h2>
+    <table class="table">
+      <tbody>
+        {% for m in data.top_merchants %}
+          <tr><td>{{ m.merchant }}</td><td class="muted">{{ m.count }}&times;</td><td class="amount">{{ m.total|floatformat:2|intcomma }}</td></tr>
+        {% empty %}
+          <tr><td class="muted">No spending yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+</div>
+{{ chart_data|json_script:"chart-data" }}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+  (function () {
+    const data = JSON.parse(document.getElementById("chart-data").textContent);
+    if (!window.Chart) return;
+    Chart.defaults.font.family = "system-ui, sans-serif";
+
+    new Chart(document.getElementById("cashflow-chart"), {
+      type: "bar",
+      data: {
+        labels: data.cashflow.map((m) => m.month),
+        datasets: [
+          { label: "Income", data: data.cashflow.map((m) => m.income), backgroundColor: "#22c55e" },
+          { label: "Spending", data: data.cashflow.map((m) => m.expenses), backgroundColor: "#2563eb" },
+        ],
+      },
+      options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } },
+    });
+
+    const categoryCanvas = document.getElementById("category-chart");
+    if (categoryCanvas) {
+      new Chart(categoryCanvas, {
+        type: "doughnut",
+        data: {
+          labels: data.categories.map((c) => c.name),
+          datasets: [{ data: data.categories.map((c) => c.total), backgroundColor: data.categories.map((c) => c.color) }],
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "right" } } },
+      });
+    }
+  })();
+</script>
+{% endblock %}

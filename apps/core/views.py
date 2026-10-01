@@ -3,6 +3,7 @@ import logging
 from django.core.cache import cache
 from django.db import connection
 from django.http import JsonResponse
+from django.shortcuts import redirect
 from django.views.decorators.http import require_GET
 from django.views.generic import TemplateView
 
@@ -11,6 +12,11 @@ logger = logging.getLogger(__name__)
 
 class HomeView(TemplateView):
     template_name = "core/home.html"
+
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect("insights:dashboard")
+        return super().get(request, *args, **kwargs)
 
 
 @require_GET
