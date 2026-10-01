@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Budgets{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Budgets</h1>
+    <p class="muted">{% now "F Y" %} &middot; {{ total_spent|floatformat:2|intcomma }} spent of {{ total_budget|floatformat:2|intcomma }}</p>
+  </div>
+  <a class="btn" href="{% url 'budgets:create' %}">New budget</a>
+</div>
+
+{% if statuses %}
+<div class="card">
+  {% for s in statuses %}
+    <div style="margin:14px 0">
+      <div style="display:flex;justify-content:space-between;gap:12px">
+        <strong>{{ s.budget.category.name }}</strong>
+        <span class="muted">
+          {{ s.spent|floatformat:2|intcomma }} / {{ s.budget.amount|floatformat:2|intcomma }}
+          ({{ s.percent }}%)
+          &middot; <a href="{% url 'budgets:edit' s.budget.pk %}">Edit</a>
+          &middot; <a href="{% url 'budgets:delete' s.budget.pk %}">Delete</a>
+        </span>
+      </div>
+      <div class="progress" role="progressbar" aria-valuenow="{{ s.percent }}" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress__bar{% if s.state == 'warning' %} progress__bar--warn{% elif s.state == 'exceeded' %} progress__bar--over{% endif %}"
+             style="width:{% if s.percent > 100 %}100{% else %}{{ s.percent }}{% endif %}%"></div>
+      </div>
+      {% if s.state == "exceeded" %}<p class="muted" style="color:var(--danger);margin:4px 0 0">Over by {{ s.overspend|floatformat:2|intcomma }}</p>{% endif %}
+    </div>
+  {% endfor %}
+</div>
+{% else %}
+  <p class="empty">No budgets yet. Set a monthly limit for a category to track it here.</p>
+{% endif %}
+{% endblock %}

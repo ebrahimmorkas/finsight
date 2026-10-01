@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "apps.ledger",
     "apps.imports",
     "apps.categorization",
+    "apps.budgets",
 ]
 
 MIDDLEWARE = [
@@ -99,7 +100,9 @@ CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER", default=not CELE
 CELERY_TASK_EAGER_PROPAGATES = True
 CELERY_TASK_ACKS_LATE = True
 CELERY_TIMEZONE = "UTC"
-CELERY_BEAT_SCHEDULE: dict = {}
+CELERY_BEAT_SCHEDULE = {
+    "check-budgets": {"task": "apps.budgets.tasks.check_all_budgets", "schedule": 60 * 60 * 6},
+}
 if not CELERY_BROKER_URL:
     CELERY_BROKER_URL = "memory://"
 

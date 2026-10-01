@@ -10,6 +10,7 @@ urlpatterns = [
     path("", include("apps.ledger.urls")),
     path("imports/", include("apps.imports.urls")),
     path("smart/", include("apps.categorization.urls")),
+    path("budgets/", include("apps.budgets.urls")),
 ]
 
 if settings.DEBUG:
