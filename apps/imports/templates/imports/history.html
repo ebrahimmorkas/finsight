@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Import history{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Import history</h1>
+  <a class="btn" href="{% url 'imports:upload' %}">Import CSV</a>
+</div>
+{% if batches %}
+<div class="card">
+  <table class="table">
+    <thead><tr><th>File</th><th>Account</th><th>New</th><th>Duplicates</th><th>Errors</th><th>Date</th></tr></thead>
+    <tbody>
+      {% for batch in batches %}
+        <tr>
+          <td><a href="{% url 'imports:detail' batch.pk %}">{{ batch.filename }}</a></td>
+          <td>{{ batch.account.name }}</td>
+          <td>{{ batch.imported }}</td>
+          <td>{{ batch.duplicates }}</td>
+          <td>{{ batch.errors|length }}</td>
+          <td>{{ batch.created_at|date:"M j, Y" }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+  <p class="empty">No imports yet.</p>
+{% endif %}
+{% endblock %}

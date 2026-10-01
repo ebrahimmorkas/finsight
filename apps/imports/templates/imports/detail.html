@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Import result{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ batch.filename }}</h1>
+    <p class="muted">Imported into {{ batch.account.name }} &middot; {{ batch.created_at|date:"M j, Y H:i" }}
+      {% if batch.date_order %}&middot; dates read as {% if batch.date_order == "dmy" %}day-first{% else %}month-first{% endif %}{% endif %}</p>
+  </div>
+  <a class="btn" href="{% url 'ledger:transactions' %}?account={{ batch.account_id }}">View transactions</a>
+</div>
+<div class="stats">
+  <div class="stat"><div class="stat__value">{{ batch.imported }}</div><div class="stat__label">New transactions</div></div>
+  <div class="stat"><div class="stat__value">{{ batch.auto_categorized }}</div><div class="stat__label">Auto-categorized</div></div>
+  <div class="stat"><div class="stat__value">{{ batch.duplicates }}</div><div class="stat__label">Duplicates skipped</div></div>
+  <div class="stat"><div class="stat__value">{{ batch.errors|length }}</div><div class="stat__label">Rows with errors</div></div>
+</div>
+{% if batch.errors %}
+  <div class="card">
+    <h3>Rows that could not be imported</h3>
+    <ul>{% for error in batch.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+  </div>
+{% endif %}
+{% endblock %}
